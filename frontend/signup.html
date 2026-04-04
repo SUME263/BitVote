@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BitVote — Create Your Account</title>
+    <link rel="stylesheet" href="style/styles.css">
+    <link rel="stylesheet" href="style/signupStyles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none;">
+                <h1><i class="fas fa-vote-yea"></i> BitVote</h1>
+            </a>
+        </div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="index.html#features" class="nav-link">Features</a></li>
+            <li class="nav-item"><a href="index.html#about" class="nav-link">About</a></li>
+            <li class="nav-item"><a href="login.html" class="nav-link">Login</a></li>
+            <li class="nav-item"><a href="signup.html" class="nav-link signup-btn">Sign up</a></li>
+            <li class="nav-item theme-toggle-container" id="theme-toggle-container"></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join the future of decentralized voting</p>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="signupForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <!-- <label><i class="fas fa-user"></i> First Name</label> -->
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="firstName" placeholder="First Name" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <!-- <label><i class="fas fa-user"></i> Last Name</label> -->
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="lastName" placeholder="Last Name" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <!-- <label><i class="fas fa-envelope"></i> Email Address</label> -->
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <!-- <label><i class="fas fa-lock"></i> Password</label> -->
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                </div>
+                <div class="password-requirements" id="passwordHelp">
+                    <i class="fas fa-info-circle"></i> Password must be at least 8 characters
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <!-- <label><i class="fas fa-check-circle"></i> Confirm Password</label> -->
+                <div class="input-group">
+                    <i class="fas fa-check-circle"></i>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="terms" required>
+                    I agree to the <a href="#" style="color: var(--accent-green);">Terms of Service</a> and <a href="#" style="color: var(--accent-green);">Privacy Policy</a>
+                </label>
+            </div>
+            
+            <button type="submit" class="auth-btn">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+        
+        <div class="divider">
+            <span>Or sign up with</span>
+        </div>
+        
+        <div class="social-login">
+            <button class="social-btn" onclick="socialSignup('google')">
+                <i class="fab fa-google"></i> Google
+            </button>
+            <!-- <button class="social-btn" onclick="socialSignup('github')">
+                <i class="fab fa-github"></i> GitHub
+            </button> -->
+            <button class="social-btn" onclick="socialSignup('twitter')">
+                <i class="fab fa-twitter"></i> X
+            </button>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-container">
+        <ul>
+            <li><a href="#"><i class="fas fa-lock"></i> Privacy Policy</a></li>
+            <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+            <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+        <p>&copy; 2026 BitVote — Sovereign voting infrastructure. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="scripts/script.js"></script>
+
+<script>
+    // Signup form handling
+    const signupForm = document.getElementById('signupForm');
+    const alertDiv = document.getElementById('alert');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirmPassword');
+    
+    // Password strength validation
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const helpText = document.getElementById('passwordHelp');
+        
+        if (password.length >= 8) {
+            helpText.innerHTML = '<i class="fas fa-check-circle"></i> Password strength: Good';
+            helpText.style.color = 'var(--accent-green)';
+        } else if (password.length > 0) {
+            helpText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Password must be at least 8 characters';
+            helpText.style.color = '#EF4444';
+        } else {
+            helpText.innerHTML = '<i class="fas fa-info-circle"></i> Password must be at least 8 characters';
+            helpText.style.color = 'var(--text-muted)';
+        }
+    });
+    
+    signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const terms = document.getElementById('terms').checked;
+        
+        // Validation
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            showAlert('Please fill in all fields', 'error');
+            return;
+        }
+        
+        if (!email.includes('@')) {
+            showAlert('Please enter a valid email address', 'error');
+            return;
+        }
+        
+        if (password.length < 8) {
+            showAlert('Password must be at least 8 characters long', 'error');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showAlert('Passwords do not match', 'error');
+            return;
+        }
+        
+        if (!terms) {
+            showAlert('Please agree to the Terms of Service', 'error');
+            return;
+        }
+        
+        // Simulate account creation
+        showAlert('Account created successfully! Redirecting to login...', 'success');
+        
+        // Store user email for login page
+        localStorage.setItem('registeredEmail', email);
+        
+        // Redirect to login after 1.5 seconds
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+    });
+    
+    function showAlert(message, type) {
+        alertDiv.textContent = message;
+        alertDiv.className = `alert ${type}`;
+        
+        setTimeout(() => {
+            alertDiv.style.display = 'none';
+            alertDiv.className = 'alert';
+        }, 3000);
+    }
+    
+    function socialSignup(provider) {
+        showAlert(`Signing up with ${provider}...`, 'success');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1500);
+    }
+</script>
+</body>
+</html>
