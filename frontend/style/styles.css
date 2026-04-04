@@ -53,7 +53,6 @@ body {
 }
 
 /* ========= NAVBAR WITH HAMBURGER ========= */
-/* ========= NAVBAR WITH HAMBURGER - FIXED ========= */
 .navbar {
     background: var(--navbar-bg);
     backdrop-filter: blur(12px);
@@ -271,7 +270,7 @@ body {
     color: white;
     font-weight: 600;
     padding: 0.8rem 1.8rem;
-    border-radius: 40px;
+    border-radius: 28px;
     text-decoration: none;
     transition: all 0.25s ease;
     box-shadow: 0 6px 14px rgba(31, 154, 85, 0.25);
@@ -328,7 +327,7 @@ body {
 
 .ballot-icon {
     background: var(--bg-card);
-    border-radius: 48px;
+    border-radius: 28px;
     padding: 2rem;
     text-align: center;
     border: 1px solid var(--border-color);
