@@ -2,42 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BitVote — Blockchain Voting Platform</title>
     <link rel="stylesheet" href="style/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+
 <body>
-   <nav class="navbar">
-    <ul>
-        <li class="logo"><h1><i class="fas fa-vote-yea" style="margin-right: 8px; color: #4cd964;"></i> BitVote</h1></li>
-        <li><a href="#"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-        <li><a href="#"><i class="fas fa-user-plus"></i> Sign up</a></li>
-    </ul>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <h1><i class="fas fa-vote-yea"></i> BitVote</h1>
+        </div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="#features" class="nav-link">Features</a></li>
+            <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+            <li class="nav-item"><a href="#login" class="nav-link">Login</a></li>
+            <li class="nav-item"><a href="#signup" class="nav-link signup-btn">Sign up</a></li>
+            <li class="nav-item theme-toggle-container" id="theme-toggle-container"></li>
+        </ul>
+    </div>
 </nav>
 
-<div class="container" style="max-width: 1280px; margin: 0 auto;">
-    <div class="intro">
-        <div class="intro-text">
-            <p>
-                <strong style="font-size: 1.6rem; display: block; margin-bottom: 1rem; color:#D0F0C0;">Decentralized trust, transparent democracy.</strong>
-                BitVote combines blockchain immutability with intuitive voting. Every ballot is verifiable, tamper-proof, and completely anonymous. 
-                Secure your voice.
-                <br><br>
-                <a id="button" class="btn-green" href="#"><i class="fas fa-rocket"></i> Get started</a>
-            </p>
-        </div>
-        <div class="intro-image">
-            <div class="ballot-icon">
-                <i class="fas fa-ballot-check"></i>
-                <i class="fab fa-bitcoin" style="font-size: 3rem; margin-left: 12px;"></i>
-                <p>⚡ On-chain voting · Immutable ledger</p>
-            </div>
+<div class="intro" id="home">
+    <div class="intro-text">
+        <p>
+            <strong style="font-size: 1.6rem; display: block; margin-bottom: 1rem;">Decentralized trust, transparent democracy.</strong>
+            BitVote combines blockchain immutability with intuitive voting. Every ballot is verifiable, tamper-proof, and completely anonymous. 
+            Secure your voice.
+            <br><br>
+            <a id="button" class="btn-green" href="#"><i class="fas fa-rocket"></i> Get started</a>
+        </p>
+    </div>
+    <div class="intro-image">
+        <div class="ballot-icon">
+            <i class="fas fa-ballot-check"></i>
+            <i class="fab fa-bitcoin"></i>
+            <p>⚡ On-chain voting · Immutable ledger</p>
         </div>
     </div>
 </div>
 
-<div class="why-it-works">
-    <h2><i class="fas fa-shield-alt" style="margin-right: 12px; color:#3CAA6F;"></i> Why it works</h2>
+<div class="why-it-works" id="features">
+    <h2><i class="fas fa-shield-alt"></i> Why it works</h2>
     <div class="benefits-grid">
         <div class="benefit-card">
             <div class="benefit-icon"><i class="fas fa-fingerprint"></i></div>
@@ -67,14 +84,14 @@
 </div>
 
 <div class="container">
-    <div class="learn-more">
+    <div class="learn-more" id="about">
         <div class="learn-content">
-            <h2> Learn more about BitVote</h2>
+            <h2>📘 Learn more about BitVote</h2>
             <p>Explore how blockchain voting eliminates fraud, increases turnout, and restores faith in democratic processes. Our whitepaper, technical deep-dive, and case studies are ready.</p>
             <div class="learn-actions">
                 <a href="#" class="btn-green"><i class="fas fa-book-open"></i> Read more</a>
-                <!-- <a href="#" class="btn-green btn-outline"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="#" class="btn-green btn-outline"><i class="fas fa-user-plus"></i> Sign up</a> -->
+                <a href="#" class="btn-green btn-outline"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="#" class="btn-green btn-outline"><i class="fas fa-user-plus"></i> Sign up</a>
             </div>
         </div>
         <div class="learn-badge">
@@ -96,5 +113,4 @@
 
 <script src="scripts/script.js"></script>
 </body>
-
 </html>
