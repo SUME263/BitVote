@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BitVote — Admin Dashboard</title>
+    <link rel="stylesheet" href="style/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Admin page specific styles */
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .admin-header {
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-header h1 i {
+            color: var(--accent-green);
+        }
+        
+        .admin-header p {
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        /* Admin stats grid */
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-stat-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+        
+        .admin-stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .admin-stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-stat-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .admin-stat-icon {
+            font-size: 2rem;
+            color: var(--accent-green);
+            opacity: 0.5;
+        }
+        
+        .admin-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-stat-change {
+            font-size: 0.85rem;
+            color: var(--accent-green);
+        }
+        
+        .admin-stat-change.negative {
+            color: #EF4444;
+        }
+        
+        /* Dashboard layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dashboard-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .card-title i {
+            color: var(--accent-green);
+            margin-right: 0.5rem;
+        }
+        
+        /* Voter list */
+        .voter-list {
+            max-height: 400px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .voter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+        
+        .voter-item:hover {
+            background: var(--bg-primary);
+        }
+        
+        .voter-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .voter-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .voter-details h4 {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .voter-details p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .voter-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-voted {
+            background: rgba(46, 189, 110, 0.2);
+            color: var(--accent-green);
+        }
+        
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+        }
+        
+        /* Election controls */
+        .election-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .control-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        .control-btn.active {
+            background: var(--accent-green);
+            color: white;
+            border-color: var(--accent-green);
+        }
+        
+        .control-btn.danger {
+            border-color: #EF4444;
+            color: #EF4444;
+        }
+        
+        .control-btn.danger:hover {
+            background: #EF4444;
+            color: white;
+        }
+        
+        /* Results table */
+        .results-table-container {
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            flex: 1;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th,
+        .admin-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .admin-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .admin-table td {
+            color: var(--text-secondary);
+        }
+        
+        /* Activity log - Fixed spacing */
+        .activity-log {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 0.5rem;
+            flex: 1;
+            padding-right: 0.5rem;
+        }
+        
+        /* Custom scrollbar for activity log */
+        .activity-log::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-log::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+        
+        .activity-log::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 10px;
+        }
+        
+        .activity-log::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green-dark);
+        }
+        
+        .voter-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .voter-list::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+        
+        .voter-list::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 10px;
+        }
+        
+        .activity-item {
+            padding: 0.75rem;
+            border-left: 3px solid var(--accent-green);
+            background: var(--bg-primary);
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+        
+        .activity-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .activity-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .activity-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+        }
+        
+        .activity-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .activity-text i {
+            color: var(--accent-green);
+            width: 20px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+        
+        .modal-content input:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-btn.confirm {
+            background: var(--accent-green);
+            color: white;
+        }
+        
+        .modal-btn.confirm:hover {
+            background: var(--accent-green-dark);
+            transform: translateY(-2px);
+        }
+        
+        .modal-btn.cancel {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .modal-btn.cancel:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-green);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1500;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toast.show {
+            display: flex;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+            
+            .admin-stats-grid {
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .admin-stat-card {
+                padding: 1rem;
+            }
+            
+            .admin-stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-card {
+                padding: 1rem;
+            }
+            
+            .card-header {
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+            }
+            
+            .election-controls {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .activity-item {
+                padding: 0.6rem;
+                margin-bottom: 0.6rem;
+            }
+            
+            .activity-text {
+                font-size: 0.8rem;
+            }
+            
+            .admin-table th,
+            .admin-table td {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none;">
+                <h1><i class="fas fa-vote-yea"></i> BitVote</h1>
+            </a>
+        </div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="index.html#features" class="nav-link">Features</a></li>
+            <li class="nav-item"><a href="vote.html" class="nav-link">Vote</a></li>
+            <li class="nav-item"><a href="results.html" class="nav-link">Results</a></li>
+            <li class="nav-item"><a href="admin.html" class="nav-link active">Admin</a></li>
+            <li class="nav-item"><a href="login.html" class="nav-link">Login</a></li>
+            <li class="nav-item theme-toggle-container" id="theme-toggle-container"></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
+        <p>Manage elections, monitor voters, and oversee the voting process</p>
+    </div>
+    
+    <!-- Statistics Grid -->
+    <div class="admin-stats-grid" id="adminStats">
+        <!-- Stats will be loaded here -->
+    </div>
+    
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Voter Management -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-users"></i> Recent Voters
+                </div>
+                <button class="control-btn" style="padding: 0.3rem 0.8rem;" onclick="refreshVoters()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="voter-list" id="voterList">
+                <!-- Voters will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Election Controls -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-calendar-alt"></i> Election Controls
+                </div>
+            </div>
+            <div class="election-controls">
+                <button class="control-btn active" onclick="setElectionStatus('active', this)">
+                    <i class="fas fa-play"></i> Start Election
+                </button>
+                <button class="control-btn" onclick="setElectionStatus('paused', this)">
+                    <i class="fas fa-pause"></i> Pause Election
+                </button>
+                <button class="control-btn danger" onclick="setElectionStatus('ended', this)">
+                    <i class="fas fa-stop"></i> End Election
+                </button>
+            </div>
+            <div class="card-header" style="margin-top: 1rem; margin-bottom: 1rem;">
+                <div class="card-title">
+                    <i class="fas fa-plus-circle"></i> Manage Candidates
+                </div>
+                <button class="control-btn" style="padding: 0.3rem 0.8rem;" onclick="openAddCandidateModal()">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div class="results-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Name</th><th>Party</th><th>Votes</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="candidatesList">
+                        <!-- Candidates will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Overview -->
+    <div class="dashboard-card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fas fa-chart-line"></i> Live Results Overview
+            </div>
+            <button class="control-btn" style="padding: 0.3rem 0.8rem;" onclick="refreshResults()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+        <div class="results-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Candidate</th><th>Party</th><th>Votes</th><th>Percentage</th><th>Status</th></tr>
+                </thead>
+                <tbody id="resultsOverview">
+                    <!-- Results will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Activity Log -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fas fa-history"></i> Admin Activity Log
+            </div>
+            <button class="control-btn" style="padding: 0.3rem 0.8rem;" onclick="clearActivityLog()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+        <div class="activity-log" id="activityLog">
+            <!-- Activity log entries will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- Add Candidate Modal -->
+<div class="modal" id="addCandidateModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-user-plus"></i> Add New Candidate</h3>
+        <input type="text" id="candidateName" placeholder="Candidate Name">
+        <input type="text" id="candidateParty" placeholder="Party Name">
+        <select id="candidateIcon">
+            <option value="fas fa-user-tie">👔 Politician</option>
+            <option value="fas fa-microchip">💻 Tech Expert</option>
+            <option value="fas fa-leaf">🌿 Environmentalist</option>
+            <option value="fas fa-gavel">⚖️ Lawyer</option>
+            <option value="fas fa-chalkboard-user">📚 Educator</option>
+            <option value="fas fa-hand-holding-heart">🤝 Activist</option>
+        </select>
+        <div class="modal-buttons">
+            <button class="modal-btn confirm" onclick="addCandidate()">Add Candidate</button>
+            <button class="modal-btn cancel" onclick="closeAddCandidateModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-container">
+        <ul>
+            <li><a href="#"><i class="fas fa-lock"></i> Privacy Policy</a></li>
+            <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+            <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+        <p>&copy; 2024 BitVote — Sovereign voting infrastructure. All rights reserved.</p>
+    </div>
+</footer>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Action completed successfully!</span>
+</div>
+
+<script src="scripts/script.js"></script>
+<script>
+    // Admin Dashboard JavaScript
+    
+    // Sample data
+    let candidates = [
+        { id: 1, name: "Dr. Sarah Johnson", party: "Progressive Alliance", votes: 387234, icon: "fas fa-user-tie" },
+        { id: 2, name: "Michael Chen", party: "Innovation Party", votes: 298765, icon: "fas fa-microchip" },
+        { id: 3, name: "Elena Rodriguez", party: "Green Future", votes: 245678, icon: "fas fa-leaf" },
+        { id: 4, name: "James Okonkwo", party: "Unity Movement", votes: 198432, icon: "fas fa-gavel" }
+    ];
+    
+    let voters = [
+        { id: 1, name: "John Doe", email: "john@example.com", voted: true, timestamp: "2024-04-05 14:30:22" },
+        { id: 2, name: "Jane Smith", email: "jane@example.com", voted: true, timestamp: "2024-04-05 13:15:07" },
+        { id: 3, name: "Bob Johnson", email: "bob@example.com", voted: false, timestamp: null },
+        { id: 4, name: "Alice Williams", email: "alice@example.com", voted: true, timestamp: "2024-04-04 18:45:33" },
+        { id: 5, name: "Charlie Brown", email: "charlie@example.com", voted: false, timestamp: null },
+        { id: 6, name: "Diana Prince", email: "diana@example.com", voted: true, timestamp: "2024-04-05 09:22:14" }
+    ];
+    
+    let activityLog = [
+        { time: "2024-04-05 14:30:22", action: "Logged in as Admin", icon: "fas fa-sign-in-alt" },
+        { time: "2024-04-05 13:15:07", action: "Election status changed to ACTIVE", icon: "fas fa-play" },
+        { time: "2024-04-04 18:45:33", action: "Added new candidate: Dr. Sarah Johnson", icon: "fas fa-user-plus" },
+        { time: "2024-04-04 14:20:15", action: "Generated election report", icon: "fas fa-file-alt" },
+        { time: "2024-04-04 09:30:42", action: "Verified 1,234 voter registrations", icon: "fas fa-user-check" },
+        { time: "2024-04-03 16:20:10", action: "Updated election settings", icon: "fas fa-cog" },
+        { time: "2024-04-03 11:45:33", action: "Exported voter data", icon: "fas fa-download" }
+    ];
+    
+    let electionStatus = "active";
+    let totalVotes = 0;
+    let registeredVoters = 15234;
+    
+    // Calculate total votes
+    function calculateTotalVotes() {
+        totalVotes = candidates.reduce((sum, c) => sum + c.votes, 0);
+    }
+    
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = toast.querySelector('i');
+        
+        toastMessage.textContent = message;
+        toast.classList.add('show');
+        
+        if (type === 'error') {
+            toastIcon.className = 'fas fa-exclamation-circle';
+            toast.style.borderLeftColor = '#EF4444';
+        } else {
+            toastIcon.className = 'fas fa-check-circle';
+            toast.style.borderLeftColor = 'var(--accent-green)';
+        }
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    
+    // Add activity log entry
+    function addActivityLog(action, icon = 'fas fa-info-circle') {
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+        activityLog.unshift({ time: timestamp, action: action, icon: icon });
+        renderActivityLog();
+        showToast(action);
+    }
+    
+    // Render admin stats
+    function renderAdminStats() {
+        const votedCount = voters.filter(v => v.voted).length;
+        const turnout = ((votedCount / registeredVoters) * 100).toFixed(1);
+        const winner = candidates.reduce((prev, current) => (prev.votes > current.votes) ? prev : current);
+        const winnerPercentage = ((winner.votes / totalVotes) * 100).toFixed(1);
+        
+        const statsHTML = `
+            <div class="admin-stat-card">
+                <div class="admin-stat-header">
+                    <span class="admin-stat-title">Total Registered Voters</span>
+                    <i class="fas fa-users admin-stat-icon"></i>
+                </div>
+                <div class="admin-stat-value">${registeredVoters.toLocaleString()}</div>
+                <div class="admin-stat-change">+124 this week</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-header">
+                    <span class="admin-stat-title">Votes Cast</span>
+                    <i class="fas fa-check-circle admin-stat-icon"></i>
+                </div>
+                <div class="admin-stat-value">${votedCount.toLocaleString()}</div>
+                <div class="admin-stat-change">${turnout}% turnout rate</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-header">
+                    <span class="admin-stat-title">Current Leader</span>
+                    <i class="fas fa-trophy admin-stat-icon"></i>
+                </div>
+                <div class="admin-stat-value">${winner.name}</div>
+                <div class="admin-stat-change">${winnerPercentage}% of votes</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-header">
+                    <span class="admin-stat-title">Election Status</span>
+                    <i class="fas fa-flag-checkered admin-stat-icon"></i>
+                </div>
+                <div class="admin-stat-value">${electionStatus.toUpperCase()}</div>
+                <div class="admin-stat-change">${electionStatus === 'active' ? '🟢 Voting in progress' : electionStatus === 'paused' ? '🟡 Temporarily paused' : '🔴 Election ended'}</div>
+            </div>
+        `;
+        
+        document.getElementById('adminStats').innerHTML = statsHTML;
+    }
+    
+    // Render voter list
+    function renderVoterList() {
+        const voterListDiv = document.getElementById('voterList');
+        voterListDiv.innerHTML = voters.map(voter => `
+            <div class="voter-item">
+                <div class="voter-info">
+                    <div class="voter-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="voter-details">
+                        <h4>${voter.name}</h4>
+                        <p>${voter.email}</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="voter-status ${voter.voted ? 'status-voted' : 'status-pending'}">
+                        ${voter.voted ? '✓ Voted' : '⏳ Pending'}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Render candidates list
+    function renderCandidatesList() {
+        const candidatesListDiv = document.getElementById('candidatesList');
+        candidatesListDiv.innerHTML = candidates.map(candidate => `
+            <tr>
+                <td>${candidate.name}</td>
+                <td>${candidate.party}</td>
+                <td>${candidate.votes.toLocaleString()}</td>
+                <td>
+                    <button class="control-btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="removeCandidate(${candidate.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    // Render results overview
+    function renderResultsOverview() {
+        const resultsDiv = document.getElementById('resultsOverview');
+        const sortedCandidates = [...candidates].sort((a, b) => b.votes - a.votes);
+        
+        resultsDiv.innerHTML = sortedCandidates.map(candidate => {
+            const percentage = (candidate.votes / totalVotes) * 100;
+            return `
+                <tr>
+                    <td><strong>${candidate.name}</strong></td>
+                    <td>${candidate.party}</td>
+                    <td>${candidate.votes.toLocaleString()}</td>
+                    <td>${percentage.toFixed(1)}%</td>
+                    <td>${candidate.id === sortedCandidates[0].id ? '🏆 Leading' : '—'}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    // Render activity log
+    function renderActivityLog() {
+        const logDiv = document.getElementById('activityLog');
+        if (activityLog.length === 0) {
+            logDiv.innerHTML = '<div class="activity-item"><div class="activity-text"><i class="fas fa-info-circle"></i> No activity logs available</div></div>';
+            return;
+        }
+        
+        logDiv.innerHTML = activityLog.map(log => `
+            <div class="activity-item">
+                <div class="activity-time">${log.time}</div>
+                <div class="activity-text">
+                    <i class="${log.icon}"></i> ${log.action}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Set election status
+    function setElectionStatus(status, buttonElement) {
+        electionStatus = status;
+        renderAdminStats();
+        addActivityLog(`Election status changed to ${status.toUpperCase()}`, 
+            status === 'active' ? 'fas fa-play' : status === 'paused' ? 'fas fa-pause' : 'fas fa-stop');
+        
+        // Update active button styling
+        const buttons = document.querySelectorAll('.election-controls .control-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        if (buttonElement) {
+            buttonElement.classList.add('active');
+        }
+    }
+    
+    // Add candidate
+    function openAddCandidateModal() {
+        document.getElementById('addCandidateModal').classList.add('active');
+    }
+    
+    function closeAddCandidateModal() {
+        document.getElementById('addCandidateModal').classList.remove('active');
+        document.getElementById('candidateName').value = '';
+        document.getElementById('candidateParty').value = '';
+    }
+    
+    function addCandidate() {
+        const name = document.getElementById('candidateName').value;
+        const party = document.getElementById('candidateParty').value;
+        const icon = document.getElementById('candidateIcon').value;
+        
+        if (!name || !party) {
+            showToast('Please fill in all fields', 'error');
+            return;
+        }
+        
+        const newId = candidates.length + 1;
+        candidates.push({
+            id: newId,
+            name: name,
+            party: party,
+            votes: 0,
+            icon: icon
+        });
+        
+        calculateTotalVotes();
+        renderCandidatesList();
+        renderResultsOverview();
+        renderAdminStats();
+        closeAddCandidateModal();
+        addActivityLog(`Added new candidate: ${name} (${party})`, 'fas fa-user-plus');
+    }
+    
+    function removeCandidate(id) {
+        if (confirm('Are you sure you want to remove this candidate?')) {
+            const candidate = candidates.find(c => c.id === id);
+            candidates = candidates.filter(c => c.id !== id);
+            calculateTotalVotes();
+            renderCandidatesList();
+            renderResultsOverview();
+            renderAdminStats();
+            addActivityLog(`Removed candidate: ${candidate.name}`, 'fas fa-user-minus');
+        }
+    }
+    
+    // Refresh functions
+    function refreshVoters() {
+        renderVoterList();
+        addActivityLog('Refreshed voter list', 'fas fa-sync-alt');
+    }
+    
+    function refreshResults() {
+        renderResultsOverview();
+        addActivityLog('Refreshed election results', 'fas fa-chart-line');
+    }
+    
+    function clearActivityLog() {
+        if (confirm('Clear all activity logs?')) {
+            activityLog = [];
+            renderActivityLog();
+            showToast('Activity log cleared', 'success');
+        }
+    }
+    
+    // Make functions global
+    window.setElectionStatus = setElectionStatus;
+    window.openAddCandidateModal = openAddCandidateModal;
+    window.closeAddCandidateModal = closeAddCandidateModal;
+    window.addCandidate = addCandidate;
+    window.removeCandidate = removeCandidate;
+    window.refreshVoters = refreshVoters;
+    window.refreshResults = refreshResults;
+    window.clearActivityLog = clearActivityLog;
+    
+    // Initialize page
+    function init() {
+        calculateTotalVotes();
+        renderAdminStats();
+        renderVoterList();
+        renderCandidatesList();
+        renderResultsOverview();
+        renderActivityLog();
+    }
+    
+    init();
+</script>
+</body>
+</html>
