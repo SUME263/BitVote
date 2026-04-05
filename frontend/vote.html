@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BitVote — Cast Your Vote Securely</title>
+    <link rel="stylesheet" href="style/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Vote page specific styles */
+        .vote-container {
+            max-width: 1280px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .vote-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .vote-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-green-light), var(--accent-green));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .vote-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Election info card */
+        .election-info {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .election-details h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .election-details p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .election-status {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.active {
+            background: rgba(46, 189, 110, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+        
+        .status-badge.ended {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+            border: 1px solid #EF4444;
+        }
+        
+        .timer {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+        
+        /* Candidates grid */
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .candidate-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 30px rgba(46, 189, 110, 0.2);
+        }
+        
+        .candidate-card.selected {
+            border-color: var(--accent-green);
+            background: linear-gradient(135deg, var(--bg-card), rgba(46, 189, 110, 0.1));
+            box-shadow: 0 0 0 3px rgba(46, 189, 110, 0.2);
+        }
+        
+        .candidate-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 3rem;
+            color: white;
+        }
+        
+        .candidate-name {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .candidate-party {
+            text-align: center;
+            color: var(--accent-green);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .candidate-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        
+        .candidate-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .vote-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .vote-count i {
+            color: var(--accent-green);
+        }
+        
+        .radio-select {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+        }
+        
+        .candidate-card.selected .radio-select {
+            border-color: var(--accent-green);
+            background: var(--accent-green);
+            box-shadow: inset 0 0 0 3px var(--bg-primary);
+        }
+        
+        /* Vote action section */
+        .vote-action {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+        
+        .selected-info {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(46, 189, 110, 0.1);
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .vote-btn {
+            background: linear-gradient(105deg, var(--accent-green-dark), var(--accent-green));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+        
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 189, 110, 0.4);
+        }
+        
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .reset-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .reset-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        /* Confirmation modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .modal-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .modal-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-btn.confirm {
+            background: var(--accent-green);
+            color: white;
+        }
+        
+        .modal-btn.cancel {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-green);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1500;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast.show {
+            display: flex;
+        }
+        
+        .toast i {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+        }
+        
+        .toast.success {
+            border-left-color: var(--accent-green);
+        }
+        
+        .toast.error {
+            border-left-color: #EF4444;
+        }
+        
+        .toast.error i {
+            color: #EF4444;
+        }
+        
+        /* Results section */
+        .results-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .results-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .result-bar {
+            margin-bottom: 1rem;
+        }
+        
+        .result-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .bar-container {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 30px;
+        }
+        
+        .bar-fill {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-green-light));
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .vote-container {
+                padding: 0 1rem;
+            }
+            
+            .vote-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .candidates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .election-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .vote-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+                margin: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none;">
+                <h1><i class="fas fa-vote-yea"></i> BitVote</h1>
+            </a>
+        </div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="index.html#features" class="nav-link">Features</a></li>
+            <li class="nav-item"><a href="vote.html" class="nav-link active">Vote</a></li>
+            <li class="nav-item"><a href="login.html" class="nav-link">Login</a></li>
+            <li class="nav-item"><a href="signup.html" class="nav-link signup-btn">Sign up</a></li>
+            <li class="nav-item theme-toggle-container" id="theme-toggle-container"></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="vote-container">
+    <div class="vote-header">
+        <h1><i class="fas fa-ballot-check"></i> Cast Your Vote</h1>
+        <p>Your voice matters — every vote is secured on the blockchain</p>
+    </div>
+    
+    <!-- Election Information -->
+    <div class="election-info">
+        <div class="election-details">
+            <h3><i class="fas fa-landmark"></i> Presidential Election 2024</h3>
+            <p><i class="fas fa-calendar"></i> March 15 - April 15, 2024</p>
+            <p><i class="fas fa-users"></i> 1,234,567 registered voters</p>
+        </div>
+        <div class="election-status">
+            <div class="status-badge active">
+                <i class="fas fa-clock"></i> Voting Active
+            </div>
+            <div class="timer" id="timer">
+                <i class="fas fa-hourglass-half"></i> Loading...
+            </div>
+        </div>
+    </div>
+    
+    <!-- Candidates Grid -->
+    <div class="candidates-grid" id="candidatesGrid">
+        <!-- Candidates will be dynamically loaded here -->
+    </div>
+    
+    <!-- Vote Action -->
+    <div class="vote-action" id="voteAction" style="display: none;">
+        <div class="selected-info" id="selectedInfo">
+            <i class="fas fa-check-circle"></i> You have selected: <strong id="selectedCandidate">None</strong>
+        </div>
+        <button class="vote-btn" id="confirmVoteBtn">
+            <i class="fas fa-check-double"></i> Confirm Vote
+        </button>
+        <button class="vote-btn reset-btn" id="resetSelectionBtn">
+            <i class="fas fa-undo-alt"></i> Reset Selection
+        </button>
+    </div>
+    
+    <!-- Live Results -->
+    <div class="results-section" id="resultsSection">
+        <h3><i class="fas fa-chart-line"></i> Live Results (Updated in Real-time)</h3>
+        <div id="resultsBars"></div>
+        <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+            <i class="fas fa-lock"></i> Results are encrypted and tamper-proof on the blockchain
+        </p>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal" id="confirmModal">
+    <div class="modal-content">
+        <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--accent-green); margin-bottom: 1rem;"></i>
+        <h3>Confirm Your Vote</h3>
+        <p>Are you sure you want to vote for <strong id="modalCandidateName"></strong>?</p>
+        <p style="font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn confirm" id="modalConfirmBtn">Yes, Cast Vote</button>
+            <button class="modal-btn cancel" id="modalCancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Vote cast successfully!</span>
+</div>
+
+<footer class="footer">
+    <div class="footer-container">
+        <ul>
+            <li><a href="#"><i class="fas fa-lock"></i> Privacy Policy</a></li>
+            <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+            <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+        <p>&copy; 2024 BitVote — Sovereign voting infrastructure. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="scripts/script.js"></script>
+
+<script>
+    // Vote Page JavaScript
+    
+    // Sample candidate data
+    const candidates = [
+        {
+            id: 1,
+            name: "Dr. Sarah Johnson",
+            party: "Progressive Alliance",
+            description: "Former UN Diplomat with 15 years of experience in international relations. Committed to climate action and digital rights.",
+            votes: 124567,
+            icon: "fas fa-user-tie"
+        },
+        {
+            id: 2,
+            name: "Michael Chen",
+            party: "Innovation Party",
+            description: "Tech entrepreneur and blockchain advocate. Focuses on economic modernization and technological sovereignty.",
+            votes: 98765,
+            icon: "fas fa-microchip"
+        },
+        {
+            id: 3,
+            name: "Elena Rodriguez",
+            party: "Green Future",
+            description: "Environmental scientist and community organizer. Dedicated to sustainable development and social equality.",
+            votes: 87654,
+            icon: "fas fa-leaf"
+        },
+        {
+            id: 4,
+            name: "James Okonkwo",
+            party: "Unity Movement",
+            description: "Human rights lawyer and social justice advocate. Fighting for equality and transparent governance.",
+            votes: 76543,
+            icon: "fas fa-gavel"
+        }
+    ];
+    
+    let selectedCandidateId = null;
+    let hasVoted = localStorage.getItem('hasVoted') === 'true';
+    let totalVotes = 0;
+    
+    // Calculate total votes
+    function calculateTotalVotes() {
+        totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+    }
+    
+    // Render candidates
+    function renderCandidates() {
+        const grid = document.getElementById('candidatesGrid');
+        grid.innerHTML = candidates.map(candidate => `
+            <div class="candidate-card ${selectedCandidateId === candidate.id ? 'selected' : ''}" 
+                 data-id="${candidate.id}"
+                 onclick="selectCandidate(${candidate.id})">
+                <div class="radio-select"></div>
+                <div class="candidate-avatar">
+                    <i class="${candidate.icon}"></i>
+                </div>
+                <div class="candidate-name">${candidate.name}</div>
+                <div class="candidate-party">${candidate.party}</div>
+                <div class="candidate-description">${candidate.description}</div>
+                <div class="candidate-stats">
+                    <div class="vote-count">
+                        <i class="fas fa-vote-yea"></i>
+                        <span>${candidate.votes.toLocaleString()} votes</span>
+                    </div>
+                    <div class="vote-percentage">
+                        ${totalVotes > 0 ? ((candidate.votes / totalVotes) * 100).toFixed(1) : 0}%
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Show/hide vote action based on selection and voting status
+        const voteAction = document.getElementById('voteAction');
+        if (selectedCandidateId !== null && !hasVoted) {
+            voteAction.style.display = 'block';
+            document.getElementById('selectedCandidate').textContent = 
+                candidates.find(c => c.id === selectedCandidateId)?.name || 'None';
+        } else {
+            voteAction.style.display = 'none';
+        }
+    }
+    
+    // Select candidate
+    window.selectCandidate = function(candidateId) {
+        if (hasVoted) {
+            showToast('You have already voted!', 'error');
+            return;
+        }
+        
+        selectedCandidateId = candidateId;
+        renderCandidates();
+    };
+    
+    // Render results bars
+    function renderResults() {
+        const resultsDiv = document.getElementById('resultsBars');
+        calculateTotalVotes();
+        
+        resultsDiv.innerHTML = candidates.map(candidate => {
+            const percentage = totalVotes > 0 ? (candidate.votes / totalVotes) * 100 : 0;
+            return `
+                <div class="result-bar">
+                    <div class="result-info">
+                        <span><strong>${candidate.name}</strong> (${candidate.party})</span>
+                        <span>${candidate.votes.toLocaleString()} votes (${percentage.toFixed(1)}%)</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: ${percentage}%">
+                            ${percentage > 8 ? percentage.toFixed(1) + '%' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = toast.querySelector('i');
+        
+        toastMessage.textContent = message;
+        toast.className = `toast ${type} show`;
+        
+        if (type === 'error') {
+            toastIcon.className = 'fas fa-exclamation-circle';
+        } else {
+            toastIcon.className = 'fas fa-check-circle';
+        }
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    
+    // Cast vote
+    function castVote() {
+        if (!selectedCandidateId) {
+            showToast('Please select a candidate first', 'error');
+            return;
+        }
+        
+        if (hasVoted) {
+            showToast('You have already cast your vote!', 'error');
+            return;
+        }
+        
+        // Simulate blockchain transaction
+        const selectedCandidate = candidates.find(c => c.id === selectedCandidateId);
+        
+        // Add vote to candidate
+        selectedCandidate.votes++;
+        
+        // Mark as voted
+        hasVoted = true;
+        localStorage.setItem('hasVoted', 'true');
+        localStorage.setItem('votedFor', selectedCandidateId);
+        
+        // Update UI
+        renderCandidates();
+        renderResults();
+        
+        // Show success message
+        showToast(`Vote cast for ${selectedCandidate.name}! Your vote is secured on the blockchain.`);
+        
+        // Disable further voting
+        const voteAction = document.getElementById('voteAction');
+        voteAction.style.display = 'none';
+    }
+    
+    // Reset selection
+    function resetSelection() {
+        if (hasVoted) {
+            showToast('Cannot reset - you have already voted', 'error');
+            return;
+        }
+        
+        selectedCandidateId = null;
+        renderCandidates();
+        showToast('Selection reset', 'success');
+    }
+    
+    // Update election timer
+    function updateTimer() {
+        const electionEnd = new Date('April 15, 2024 23:59:59').getTime();
+        const now = new Date().getTime();
+        const distance = electionEnd - now;
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        const timerElement = document.getElementById('timer');
+        if (distance > 0) {
+            timerElement.innerHTML = `<i class="fas fa-hourglass-half"></i> ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        } else {
+            timerElement.innerHTML = '<i class="fas fa-flag-checkered"></i> Election Ended';
+            document.querySelector('.status-badge').className = 'status-badge ended';
+            document.querySelector('.status-badge').innerHTML = '<i class="fas fa-stop-circle"></i> Voting Ended';
+        }
+    }
+    
+    // Check if user has already voted on page load
+    function checkPreviousVote() {
+        const voted = localStorage.getItem('hasVoted');
+        const votedFor = localStorage.getItem('votedFor');
+        
+        if (voted === 'true' && votedFor) {
+            hasVoted = true;
+            selectedCandidateId = parseInt(votedFor);
+            showToast(`Welcome back! You voted for ${candidates.find(c => c.id === selectedCandidateId)?.name}`, 'success');
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('confirmVoteBtn')?.addEventListener('click', () => {
+        if (!selectedCandidateId) {
+            showToast('Please select a candidate first', 'error');
+            return;
+        }
+        
+        const candidate = candidates.find(c => c.id === selectedCandidateId);
+        document.getElementById('modalCandidateName').textContent = candidate.name;
+        document.getElementById('confirmModal').classList.add('active');
+    });
+    
+    document.getElementById('resetSelectionBtn')?.addEventListener('click', resetSelection);
+    
+    document.getElementById('modalConfirmBtn')?.addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+        castVote();
+    });
+    
+    document.getElementById('modalCancelBtn')?.addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('confirmModal')?.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('confirmModal')) {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+    });
+    
+    // Initialize page
+    function init() {
+        calculateTotalVotes();
+        checkPreviousVote();
+        renderCandidates();
+        renderResults();
+        updateTimer();
+        setInterval(updateTimer, 1000);
+        
+        // Auto-refresh results every 5 seconds (simulating real-time updates)
+        setInterval(() => {
+            if (!hasVoted) {
+                renderResults();
+            }
+        }, 5000);
+    }
+    
+    init();
+</script>
+</body>
+</html>

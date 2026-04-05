@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BitVote — Election Results Dashboard</title>
+    <link rel="stylesheet" href="style/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Results page specific styles */
+        .results-container {
+            max-width: 1280px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .results-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-green-light), var(--accent-green));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .results-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Stats cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Winner announcement */
+        .winner-announcement {
+            background: linear-gradient(135deg, var(--bg-card), rgba(46, 189, 110, 0.1));
+            border-radius: 30px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            border: 2px solid var(--accent-green);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .winner-crown {
+            font-size: 3rem;
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            opacity: 0.3;
+        }
+        
+        .winner-badge {
+            display: inline-block;
+            background: var(--accent-green);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        
+        .winner-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        .winner-party {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .winner-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .winner-stat {
+            text-align: center;
+        }
+        
+        .winner-stat .number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        /* Chart section */
+        .chart-section {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .candidate-results {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .candidate-result-item {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .candidate-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .candidate-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .candidate-avatar-small {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .candidate-details h4 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .candidate-details p {
+            font-size: 0.85rem;
+            color: var(--accent-green);
+        }
+        
+        .vote-numbers {
+            text-align: right;
+        }
+        
+        .vote-count-large {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .vote-percentage {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .progress-bar-container {
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 30px;
+            position: relative;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-green-light));
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Historical data - Fixed for mobile */
+        .historical-table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 1rem 0;
+            border-radius: 12px;
+            background: var(--bg-primary);
+        }
+        
+        .historical-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+        
+        .historical-table th,
+        .historical-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .historical-table th {
+            color: var(--text-primary);
+            font-weight: 600;
+            background: var(--bg-card);
+            position: sticky;
+            top: 0;
+        }
+        
+        .historical-table td {
+            color: var(--text-secondary);
+        }
+        
+        /* Card view for mobile */
+        .historical-cards {
+            display: none;
+            gap: 1rem;
+            flex-direction: column;
+        }
+        
+        .historical-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease;
+        }
+        
+        .historical-card:hover {
+            transform: translateX(5px);
+            border-color: var(--accent-green);
+        }
+        
+        .historical-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .historical-year {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+        
+        .historical-winner-badge {
+            background: rgba(46, 189, 110, 0.2);
+            color: var(--accent-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .historical-card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        
+        .historical-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .historical-info-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .historical-info-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* Blockchain verification */
+        .verification-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .verification-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        
+        .verification-header i {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+        }
+        
+        .verification-details {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        
+        .verification-details.active {
+            display: block;
+        }
+        
+        .hash-line {
+            margin: 0.5rem 0;
+            word-break: break-all;
+            color: var(--text-secondary);
+        }
+        
+        .verify-btn {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--accent-green);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-green);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Share buttons */
+        .share-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .share-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .share-btn.twitter {
+            background: #1DA1F2;
+            color: white;
+        }
+        
+        .share-btn.facebook {
+            background: #4267B2;
+            color: white;
+        }
+        
+        .share-btn.linkedin {
+            background: #0077B5;
+            color: white;
+        }
+        
+        .share-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .results-container {
+                padding: 0 1rem;
+            }
+            
+            .results-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .winner-name {
+                font-size: 1.5rem;
+            }
+            
+            .candidate-result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .vote-numbers {
+                text-align: left;
+            }
+            
+            .stats-grid {
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .stat-icon {
+                font-size: 1.8rem;
+            }
+            
+            .winner-announcement {
+                padding: 1.5rem;
+            }
+            
+            .winner-stats {
+                gap: 1rem;
+            }
+            
+            .winner-stat .number {
+                font-size: 1.1rem;
+            }
+            
+            .tabs {
+                gap: 0.5rem;
+            }
+            
+            .tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .share-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .share-btn {
+                justify-content: center;
+            }
+            
+            .chart-section {
+                padding: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .candidate-result-item {
+                padding: 0.8rem;
+            }
+            
+            .candidate-info {
+                flex: 1;
+            }
+            
+            .candidate-avatar-small {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .candidate-details h4 {
+                font-size: 0.95rem;
+            }
+            
+            .vote-count-large {
+                font-size: 1rem;
+            }
+            
+            .progress-bar-container {
+                height: 25px;
+            }
+            
+            .progress-fill {
+                font-size: 0.7rem;
+            }
+            
+            /* Show cards on mobile, hide table */
+            .historical-table-container {
+                display: none;
+            }
+            
+            .historical-cards {
+                display: flex;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .historical-cards {
+                display: none;
+            }
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-green);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1500;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none;">
+                <h1><i class="fas fa-vote-yea"></i> BitVote</h1>
+            </a>
+        </div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="index.html#features" class="nav-link">Features</a></li>
+            <li class="nav-item"><a href="vote.html" class="nav-link">Vote</a></li>
+            <li class="nav-item"><a href="results.html" class="nav-link active">Results</a></li>
+            <li class="nav-item"><a href="login.html" class="nav-link">Login</a></li>
+            <li class="nav-item"><a href="signup.html" class="nav-link signup-btn">Sign up</a></li>
+            <li class="nav-item theme-toggle-container" id="theme-toggle-container"></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="results-container">
+    <div class="results-header">
+        <h1><i class="fas fa-chart-bar"></i> Election Results 2024</h1>
+        <p>Official, verifiable, and transparent results on the blockchain</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-grid" id="statsGrid"></div>
+    
+    <!-- Winner Announcement -->
+    <div class="winner-announcement" id="winnerAnnouncement"></div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" data-tab="results">Detailed Results</button>
+        <button class="tab" data-tab="historical">Historical Data</button>
+        <button class="tab" data-tab="verification">Blockchain Verification</button>
+    </div>
+    
+    <!-- Tab 1: Detailed Results -->
+    <div class="tab-content active" id="results-tab">
+        <div class="chart-section">
+            <h3 class="section-title">
+                <i class="fas fa-chart-pie"></i> Vote Distribution by Candidate
+            </h3>
+            <div class="candidate-results" id="candidateResults"></div>
+        </div>
+        
+        <div class="share-buttons">
+            <button class="share-btn twitter" onclick="shareResults('twitter')">
+                <i class="fab fa-twitter"></i> Share on X
+            </button>
+            <button class="share-btn facebook" onclick="shareResults('facebook')">
+                <i class="fab fa-facebook-f"></i> Share on Facebook
+            </button>
+            <button class="share-btn linkedin" onclick="shareResults('linkedin')">
+                <i class="fab fa-linkedin-in"></i> Share on LinkedIn
+            </button>
+        </div>
+    </div>
+    
+    <!-- Tab 2: Historical Data -->
+    <div class="tab-content" id="historical-tab">
+        <div class="chart-section">
+            <h3 class="section-title">
+                <i class="fas fa-history"></i> Historical Election Data
+            </h3>
+            
+            <!-- Table view for desktop -->
+            <div class="historical-table-container">
+                <table class="historical-table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Winner</th>
+                            <th>Party</th>
+                            <th>Vote Share</th>
+                            <th>Turnout</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historicalBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- Card view for mobile -->
+            <div class="historical-cards" id="historicalCards"></div>
+            
+            <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                <i class="fas fa-database"></i> Data source: Blockchain records | Last updated: 2024
+            </p>
+        </div>
+    </div>
+    
+    <!-- Tab 3: Blockchain Verification -->
+    <div class="tab-content" id="verification-tab">
+        <div class="verification-section">
+            <div class="verification-header" onclick="toggleVerification()">
+                <i class="fas fa-link"></i>
+                <strong>Blockchain Transaction Records</strong>
+                <i class="fas fa-chevron-down" style="margin-left: auto;"></i>
+            </div>
+            <div class="verification-details" id="verificationDetails">
+                <div class="hash-line"><strong>Contract Address:</strong> 0x7a5f3c8e9b2d1f4a6e8c9b7d5f3a2e1c8b9a7d5f</div>
+                <div class="hash-line"><strong>Transaction Hash:</strong> 0x9f2c4d8e1a5b7c3d6f8e9a2b4c6d8f1e3a5b7c9d</div>
+                <div class="hash-line"><strong>Block Number:</strong> 18,924,567</div>
+                <div class="hash-line"><strong>Timestamp:</strong> 2024-04-15 23:59:59 UTC</div>
+                <div class="hash-line"><strong>Verification Status:</strong> ✓ Verified on Ethereum Mainnet</div>
+                <button class="verify-btn" onclick="verifyOnBlockchain()">
+                    <i class="fas fa-check-circle"></i> Verify on Blockchain Explorer
+                </button>
+            </div>
+        </div>
+        
+        <div class="verification-section" style="margin-top: 1rem;">
+            <div class="verification-header" onclick="toggleMerkleProof()">
+                <i class="fas fa-tree"></i>
+                <strong>Merkle Tree Proof</strong>
+                <i class="fas fa-chevron-down" style="margin-left: auto;"></i>
+            </div>
+            <div class="verification-details" id="merkleProofDetails">
+                <div class="hash-line"><strong>Root Hash:</strong> 0x8a3f2e1d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f</div>
+                <div class="hash-line"><strong>Total Votes Verified:</strong> 1,234,567</div>
+                <div class="hash-line"><strong>Integrity Check:</strong> ✓ Passed - No tampering detected</div>
+                <div class="hash-line"><strong>Merkle Root:</strong> 0x9d8f7e6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-container">
+        <ul>
+            <li><a href="#"><i class="fas fa-lock"></i> Privacy Policy</a></li>
+            <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+            <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+        <p>&copy; 2024 BitVote — Sovereign voting infrastructure. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="scripts/script.js"></script>
+
+<script>
+    // Results Page JavaScript
+    
+    // Candidate data
+    const candidates = [
+        {
+            id: 1,
+            name: "Dr. Sarah Johnson",
+            party: "Progressive Alliance",
+            description: "Former UN Diplomat with 15 years of experience",
+            votes: 387234,
+            icon: "fas fa-user-tie",
+            color: "#2EBD6E"
+        },
+        {
+            id: 2,
+            name: "Michael Chen",
+            party: "Innovation Party",
+            description: "Tech entrepreneur and blockchain advocate",
+            votes: 298765,
+            icon: "fas fa-microchip",
+            color: "#3B82F6"
+        },
+        {
+            id: 3,
+            name: "Elena Rodriguez",
+            party: "Green Future",
+            description: "Environmental scientist and community organizer",
+            votes: 245678,
+            icon: "fas fa-leaf",
+            color: "#10B981"
+        },
+        {
+            id: 4,
+            name: "James Okonkwo",
+            party: "Unity Movement",
+            description: "Human rights lawyer and social justice advocate",
+            votes: 198432,
+            icon: "fas fa-gavel",
+            color: "#F59E0B"
+        }
+    ];
+    
+    let totalVotes = 0;
+    let turnout = 78.5;
+    
+    // Calculate total votes
+    function calculateTotalVotes() {
+        totalVotes = candidates.reduce((sum, c) => sum + c.votes, 0);
+    }
+    
+    // Find winner
+    function findWinner() {
+        return candidates.reduce((prev, current) => 
+            (prev.votes > current.votes) ? prev : current
+        );
+    }
+    
+    // Render statistics cards
+    function renderStats() {
+        const winner = findWinner();
+        const winnerPercentage = ((winner.votes / totalVotes) * 100).toFixed(1);
+        
+        const statsHTML = `
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-value">${totalVotes.toLocaleString()}</div>
+                <div class="stat-label">Total Votes Cast</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-value">${turnout}%</div>
+                <div class="stat-label">Voter Turnout</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                <div class="stat-value">${winner.votes.toLocaleString()}</div>
+                <div class="stat-label">Winner's Votes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-percent"></i></div>
+                <div class="stat-value">${winnerPercentage}%</div>
+                <div class="stat-label">Winner's Share</div>
+            </div>
+        `;
+        
+        document.getElementById('statsGrid').innerHTML = statsHTML;
+    }
+    
+    // Render winner announcement
+    function renderWinner() {
+        const winner = findWinner();
+        const winnerPercentage = ((winner.votes / totalVotes) * 100).toFixed(1);
+        const margin = ((winner.votes - candidates[1].votes) / totalVotes * 100).toFixed(1);
+        
+        const winnerHTML = `
+            <div class="winner-crown">👑</div>
+            <div class="winner-badge">
+                <i class="fas fa-check-circle"></i> Official Winner
+            </div>
+            <div class="winner-name">${winner.name}</div>
+            <div class="winner-party">${winner.party}</div>
+            <div class="winner-stats">
+                <div class="winner-stat">
+                    <div class="number">${winner.votes.toLocaleString()}</div>
+                    <div class="stat-label">Total Votes</div>
+                </div>
+                <div class="winner-stat">
+                    <div class="number">${winnerPercentage}%</div>
+                    <div class="stat-label">Vote Share</div>
+                </div>
+                <div class="winner-stat">
+                    <div class="number">${margin}%</div>
+                    <div class="stat-label">Margin of Victory</div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('winnerAnnouncement').innerHTML = winnerHTML;
+    }
+    
+    // Render candidate results
+    function renderCandidateResults() {
+        const resultsContainer = document.getElementById('candidateResults');
+        const sortedCandidates = [...candidates].sort((a, b) => b.votes - a.votes);
+        
+        resultsContainer.innerHTML = sortedCandidates.map((candidate, index) => {
+            const percentage = (candidate.votes / totalVotes) * 100;
+            const rank = index + 1;
+            
+            return `
+                <div class="candidate-result-item">
+                    <div class="candidate-result-header">
+                        <div class="candidate-info">
+                            <div class="candidate-avatar-small">
+                                <i class="${candidate.icon}"></i>
+                            </div>
+                            <div class="candidate-details">
+                                <h4>${rank}. ${candidate.name}</h4>
+                                <p>${candidate.party}</p>
+                            </div>
+                        </div>
+                        <div class="vote-numbers">
+                            <div class="vote-count-large">${candidate.votes.toLocaleString()} votes</div>
+                            <div class="vote-percentage">${percentage.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-fill" style="width: ${percentage}%">
+                            ${percentage > 8 ? percentage.toFixed(1) + '%' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Render historical data
+    function renderHistoricalData() {
+        const historicalData = [
+            { 
+                year: 2024, 
+                winner: "Dr. Sarah Johnson", 
+                party: "Progressive Alliance", 
+                share: "52.3%", 
+                turnout: "78.5%",
+                votes: "1,129,109",
+                margin: "12.5%"
+            },
+            { 
+                year: 2020, 
+                winner: "Dr. Sarah Johnson", 
+                party: "Progressive Alliance", 
+                share: "51.8%", 
+                turnout: "74.2%",
+                votes: "987,654",
+                margin: "8.3%" 
+            },
+            { 
+                year: 2016, 
+                winner: "Robert Williams", 
+                party: "Unity Movement", 
+                share: "48.7%", 
+                turnout: "71.5%",
+                votes: "876,543",
+                margin: "3.2%"
+            },
+            { 
+                year: 2012, 
+                winner: "Dr. Sarah Johnson", 
+                party: "Progressive Alliance", 
+                share: "51.2%", 
+                turnout: "69.8%",
+                votes: "765,432",
+                margin: "6.7%"
+            },
+            { 
+                year: 2008, 
+                winner: "Michael Chen", 
+                party: "Innovation Party", 
+                share: "49.5%", 
+                turnout: "72.3%",
+                votes: "698,765",
+                margin: "4.1%"
+            }
+        ];
+        
+        // Render table view
+        const historicalBody = document.getElementById('historicalBody');
+        historicalBody.innerHTML = historicalData.map(data => `
+            <tr>
+                <td><strong>${data.year}</strong></td>
+                <td>${data.winner}</td>
+                <td>${data.party}</td>
+                <td>${data.share}</td>
+                <td>${data.turnout}</td>
+            </tr>
+        `).join('');
+        
+        // Render card view for mobile
+        const historicalCards = document.getElementById('historicalCards');
+        historicalCards.innerHTML = historicalData.map(data => `
+            <div class="historical-card">
+                <div class="historical-card-header">
+                    <span class="historical-year">${data.year}</span>
+                    <span class="historical-winner-badge">
+                        <i class="fas fa-trophy"></i> Winner
+                    </span>
+                </div>
+                <div class="historical-card-content">
+                    <div class="historical-info">
+                        <div class="historical-info-label">Winner</div>
+                        <div class="historical-info-value">${data.winner}</div>
+                    </div>
+                    <div class="historical-info">
+                        <div class="historical-info-label">Party</div>
+                        <div class="historical-info-value">${data.party}</div>
+                    </div>
+                    <div class="historical-info">
+                        <div class="historical-info-label">Vote Share</div>
+                        <div class="historical-info-value">${data.share}</div>
+                    </div>
+                    <div class="historical-info">
+                        <div class="historical-info-label">Turnout</div>
+                        <div class="historical-info-value">${data.turnout}</div>
+                    </div>
+                    <div class="historical-info">
+                        <div class="historical-info-label">Total Votes</div>
+                        <div class="historical-info-value">${data.votes}</div>
+                    </div>
+                    <div class="historical-info">
+                        <div class="historical-info-label">Margin</div>
+                        <div class="historical-info-value">${data.margin}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Tab switching
+    function initTabs() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+    }
+    
+    // Toggle functions
+    function toggleVerification() {
+        const details = document.getElementById('verificationDetails');
+        details.classList.toggle('active');
+    }
+    
+    function toggleMerkleProof() {
+        const details = document.getElementById('merkleProofDetails');
+        details.classList.toggle('active');
+    }
+    
+    function verifyOnBlockchain() {
+        alert('Opening blockchain explorer...\nTransaction Hash: 0x9f2c4d8e1a5b7c3d6f8e9a2b4c6d8f1e3a5b7c9d');
+        window.open('https://etherscan.io/tx/0x9f2c4d8e1a5b7c3d6f8e9a2b4c6d8f1e3a5b7c9d', '_blank');
+    }
+    
+    // Share results
+    function shareResults(platform) {
+        const winner = findWinner();
+        const winnerPercentage = ((winner.votes / totalVotes) * 100).toFixed(1);
+        const text = `🗳️ Election Results 2024: ${winner.name} wins with ${winnerPercentage}% of votes! ${totalVotes.toLocaleString()} votes cast on BitVote blockchain. #BitVote #ElectionResults`;
+        const url = window.location.href;
+        
+        let shareUrl = '';
+        switch(platform) {
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                break;
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+                break;
+            case 'linkedin':
+                shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text)}`;
+                break;
+        }
+        
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+    
+    // Make functions global
+    window.toggleVerification = toggleVerification;
+    window.toggleMerkleProof = toggleMerkleProof;
+    window.verifyOnBlockchain = verifyOnBlockchain;
+    window.shareResults = shareResults;
+    
+    // Initialize page
+    function init() {
+        calculateTotalVotes();
+        renderStats();
+        renderWinner();
+        renderCandidateResults();
+        renderHistoricalData();
+        initTabs();
+    }
+    
+    init();
+</script>
+</body>
+</html>

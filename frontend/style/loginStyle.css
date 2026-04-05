@@ -141,6 +141,7 @@
             text-align: center;
             color: var(--text-secondary);
             font-size: 0.9rem;
+            padding-top: 20px;
         }
         
         .auth-footer a {
